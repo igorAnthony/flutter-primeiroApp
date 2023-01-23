@@ -1,20 +1,4 @@
-<<<<<<< HEAD
-# flutter_primeiro_app
+# Getting Started
 
-A new Flutter project.
+I am Lerning about Flutter, Dart and Firebase, this project is for me to improve my skills.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# flutter-primeiroApp
->>>>>>> b03818f1a3b85105c69a2a895ca35267ee6a5ca5
