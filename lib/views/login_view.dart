@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -49,7 +50,7 @@ class _LoginViewState extends State<LoginView> {
                     enableSuggestions: false,
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: "Enter your email here",
                     ),
                   ),
@@ -59,7 +60,7 @@ class _LoginViewState extends State<LoginView> {
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: "Enter your password here",
                     ),
                   ),
@@ -68,17 +69,26 @@ class _LoginViewState extends State<LoginView> {
                       final email = _email.text;
                       final password = _password.text;
                       try{
-                        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-                        print(userCredential);
+                        final userCredential = 
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email, 
+                            password: password,
+                          );
+                        devtools.log(userCredential.toString());
+                        Navigator.of(context).
+                          pushNamedAndRemoveUntil(
+                            '/notes/', 
+                            (Route<dynamic> route) => false
+                          );
                       } on FirebaseAuthException catch (e){
                         if(e.code == 'user-not-found'){
-                          print("User not found");
+                          showAlertDialog(context, "User not found");
                         }
                         else if(e.code == 'wrong-password'){
-                          print("Wrong password");
+                          showAlertDialog(context, "Wrong password");
                         }
                         else if(e.code=="invalid-email"){
-                          print("Invalid email");
+                          showAlertDialog(context, "Invalid email");
                         }
                       }
                     }, 
@@ -103,5 +113,21 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
-
+Future<void> showAlertDialog(BuildContext context, String stringError) async {
+  showDialog(
+    context: context, 
+    builder:(context) {
+      return AlertDialog(
+        title:const Text("Login problem"),
+        content: Text(stringError),
+        actions: [
+          TextButton(onPressed:() {
+            Navigator.of(context).pop();
+          }, 
+          child: const Text("Ok"))
+        ],
+      );
+    },
+  );
+}
 

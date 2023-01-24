@@ -1,9 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_primeiro_app/firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -73,17 +72,26 @@ class _RegisterViewState extends State<RegisterView> {
                       final password = _password.text;
 
                       try{
-                        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-                        print(userCredential);
+                        final userCredential = 
+                          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: email, 
+                            password: password,
+                          );
+                        devtools.log(userCredential.toString());
+                        Navigator.of(context).
+                          pushNamedAndRemoveUntil(
+                            '/login/', 
+                            (Route<dynamic> route) => false
+                          );
                       } on FirebaseAuthException catch(e){
                         if(e.code == 'weak-password'){
-                          print("Weak password");
+                          showAlertDialog(context,"Weak password");
                         }else if(e.code=='email-already-in-use'){
-                          print("Email already in use");
+                          showAlertDialog(context,"Email already in use");
                         }else if(e.code=="invalid-email"){
-                          print("Invalid email");
+                          showAlertDialog(context,"Invalid email");
                         }else{
-                          print(e.code);
+                          devtools.log(e.code);
                         }
                       }
                     }, 
@@ -109,4 +117,21 @@ class _RegisterViewState extends State<RegisterView> {
       ) 
     );
   }
+}
+Future<void> showAlertDialog(BuildContext context, String stringError) async {
+  showDialog(
+    context: context, 
+    builder:(context) {
+      return AlertDialog(
+        title:const Text("Register problem"),
+        content: Text(stringError),
+        actions: [
+          TextButton(onPressed:() {
+            Navigator.of(context).pop();
+          }, 
+          child: const Text("Ok"))
+        ],
+      );
+    },
+  );
 }
