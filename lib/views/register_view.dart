@@ -5,6 +5,8 @@ import 'package:flutter_primeiro_app/constants/routes.dart';
 import 'package:flutter_primeiro_app/firebase_options.dart';
 import 'dart:developer' as devtools show log;
 
+import '../utilities/show_error_dialog.dart';
+
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -86,14 +88,16 @@ class _RegisterViewState extends State<RegisterView> {
                           );
                       } on FirebaseAuthException catch(e){
                         if(e.code == 'weak-password'){
-                          showAlertDialog(context,"Weak password");
+                          await showErrorDialog(context,"Weak password");
                         }else if(e.code=='email-already-in-use'){
-                          showAlertDialog(context,"Email already in use");
+                          await showErrorDialog(context,"Email already in use");
                         }else if(e.code=="invalid-email"){
-                          showAlertDialog(context,"Invalid email");
+                          await showErrorDialog(context,"Invalid email");
                         }else{
-                          devtools.log(e.code);
+                          await showErrorDialog(context, "ERROR: ${e.code}");
                         }
+                      } catch (e){
+                        await showErrorDialog(context, "ERROR: ${e.toString()}");
                       }
                     }, 
                     child: const Text("Register"), 
@@ -118,21 +122,4 @@ class _RegisterViewState extends State<RegisterView> {
       ) 
     );
   }
-}
-Future<void> showAlertDialog(BuildContext context, String stringError) async {
-  showDialog(
-    context: context, 
-    builder:(context) {
-      return AlertDialog(
-        title:const Text("Register problem"),
-        content: Text(stringError),
-        actions: [
-          TextButton(onPressed:() {
-            Navigator.of(context).pop();
-          }, 
-          child: const Text("Ok"))
-        ],
-      );
-    },
-  );
 }

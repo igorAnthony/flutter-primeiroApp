@@ -6,6 +6,8 @@ import 'package:flutter_primeiro_app/constants/routes.dart';
 import '../firebase_options.dart';
 import 'dart:developer' as devtools show log;
 
+import '../utilities/show_error_dialog.dart';
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -83,14 +85,18 @@ class _LoginViewState extends State<LoginView> {
                           );
                       } on FirebaseAuthException catch (e){
                         if(e.code == 'user-not-found'){
-                          showAlertDialog(context, "User not found");
+                          await showErrorDialog(context, "User not found");
                         }
                         else if(e.code == 'wrong-password'){
-                          showAlertDialog(context, "Wrong password");
+                          await showErrorDialog(context, "Wrong password");
                         }
                         else if(e.code=="invalid-email"){
-                          showAlertDialog(context, "Invalid email");
+                          await showErrorDialog(context, "Invalid email");
+                        }else{
+                          await showErrorDialog(context, "ERROR: ${e.code}");
                         }
+                      } catch (e){
+                        await showErrorDialog(context, "ERROR: ${e.toString()}");
                       }
                     }, 
                     child: const Text("Login"), 
@@ -114,21 +120,5 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
-Future<void> showAlertDialog(BuildContext context, String stringError) async {
-  showDialog(
-    context: context, 
-    builder:(context) {
-      return AlertDialog(
-        title:const Text("Login problem"),
-        content: Text(stringError),
-        actions: [
-          TextButton(onPressed:() {
-            Navigator.of(context).pop();
-          }, 
-          child: const Text("Ok"))
-        ],
-      );
-    },
-  );
-}
+
 
