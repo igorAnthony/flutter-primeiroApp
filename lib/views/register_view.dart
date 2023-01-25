@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_primeiro_app/constants/routes.dart';
 import 'package:flutter_primeiro_app/firebase_options.dart';
 import 'dart:developer' as devtools show log;
 
@@ -80,7 +81,7 @@ class _RegisterViewState extends State<RegisterView> {
                         devtools.log(userCredential.toString());
                         Navigator.of(context).
                           pushNamedAndRemoveUntil(
-                            '/login/', 
+                            loginRoute, 
                             (Route<dynamic> route) => false
                           );
                       } on FirebaseAuthException catch(e){
@@ -100,7 +101,7 @@ class _RegisterViewState extends State<RegisterView> {
                   TextButton(
                     onPressed:() {
                       Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/login/', 
+                        loginRoute, 
                         (Route<dynamic> route) => false
                       );
                     }, 
