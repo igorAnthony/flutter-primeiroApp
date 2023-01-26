@@ -1,11 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_primeiro_app/constants/routes.dart';
-
-import '../firebase_options.dart';
-import 'dart:developer' as devtools show log;
-
+import 'package:flutter_primeiro_app/services/auth/auth_exceptions.dart';
+import 'package:flutter_primeiro_app/services/auth/auth_service.dart';
 import '../utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -18,20 +14,21 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  
+
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
     super.initState();
   }
-  
+
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,12 +36,9 @@ class _LoginViewState extends State<LoginView> {
         title: const Text("Login"),
       ),
       body: FutureBuilder(
-        future: 
-          Firebase.initializeApp(
-            options: DefaultFirebaseOptions.currentPlatform,
-          ),
-        builder:(context, snapshot) {
-          switch(snapshot.connectionState){ 
+        future: AuthService.firebase().initialize(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
             case ConnectionState.done:
               return Column(
                 children: [
@@ -71,62 +65,49 @@ class _LoginViewState extends State<LoginView> {
                     onPressed: () async {
                       final email = _email.text;
                       final password = _password.text;
-                      try{
-                        await FirebaseAuth.instance.signInWithEmailAndPassword(
-                            email: email, 
-                            password: password,
+                      try {
+                        await AuthService.firebase().logIn(
+                          email: email,
+                          password: password,
                         );
-                        final user = FirebaseAuth.instance.currentUser;
-                        if(user?.emailVerified ?? false){
-                          Navigator.of(context).
-                          pushNamedAndRemoveUntil(
-                            notesRoute, 
-                            (Route<dynamic> route) => false
+                        final user = AuthService.firebase().currentUser;
+                        if (user?.isEmailVerified ?? false) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            notesRoute,
+                            (Route<dynamic> route) => false,
                           );
-                        }else{
-                          Navigator.of(context).
-                          pushNamedAndRemoveUntil(
-                            verifyEmailRoute, 
-                            (Route<dynamic> route) => false
+                        } else {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            verifyEmailRoute,
+                            (Route<dynamic> route) => false,
                           );
                         }
-                        
-                      } on FirebaseAuthException catch (e){
-                        if(e.code == 'user-not-found'){
-                          await showErrorDialog(context, "User not found");
-                        }
-                        else if(e.code == 'wrong-password'){
-                          await showErrorDialog(context, "Wrong password");
-                        }
-                        else if(e.code=="invalid-email"){
-                          await showErrorDialog(context, "Invalid email");
-                        }else{
-                          await showErrorDialog(context, "ERROR: ${e.code}");
-                        }
-                      } catch (e){
-                        await showErrorDialog(context, "ERROR: ${e.toString()}");
+                      } on UserNotFoundAuthException {
+                        await showErrorDialog(context, "User not found");
+                      } on WrongPasswordAuthException {
+                        await showErrorDialog(context, "Wrong password");
+                      } on InvalidEmailAuthException {
+                        await showErrorDialog(context, "Invalid email");
+                      } on GenericAuthException {
+                        await showErrorDialog(context, 'Failed to register');
                       }
-                    }, 
-                    child: const Text("Login"), 
+                    },
+                    child: const Text("Login"),
                   ),
-                  TextButton(onPressed:() {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      registerRoute, 
-                      (Route<dynamic> route) => false
-                    );
-                  },
-                  child: const Text("Not registered yet? Register here"))
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          registerRoute, (Route<dynamic> route) => false,);
+                    },
+                    child: const Text("Not registered yet? Register here")
+                  ),
                 ]
-              );  
+              );
             default:
               return const Text("Loading...");
           }
-          
         },
-        
-      ) 
+      )
     );
   }
 }
-
-
