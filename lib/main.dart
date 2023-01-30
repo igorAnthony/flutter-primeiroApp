@@ -8,6 +8,8 @@ import 'package:flutter_primeiro_app/views/notes_view.dart';
 import 'package:flutter_primeiro_app/views/register_view.dart';
 import 'package:flutter_primeiro_app/views/verify_email_view.dart';
 
+import 'services/crud/notes_service.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
