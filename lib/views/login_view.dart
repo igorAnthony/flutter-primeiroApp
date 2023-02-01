@@ -55,7 +55,6 @@ class _LoginViewState extends State<LoginView> {
                     controller: _password,
                     enableSuggestions: false,
                     autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
                     obscureText: true,
                     decoration: const InputDecoration(
                       hintText: "Enter your password here",

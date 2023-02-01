@@ -58,7 +58,6 @@ class _RegisterViewState extends State<RegisterView> {
                     controller: _password,
                     enableSuggestions: false,
                     autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
                     obscureText: true,
                     // ignore: prefer_const_constructors
                     decoration: InputDecoration(
