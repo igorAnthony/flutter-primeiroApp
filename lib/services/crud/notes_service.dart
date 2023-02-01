@@ -125,9 +125,9 @@ class NotesService {
     }
     const text = '';
     final noteId = await db.insert(noteTable, {
-      userIdColumn: owner,
+      userIdColumn: owner.id,
       textColumn: text,
-      isSyncedWithCloudColumn: true,
+      isSyncedWithCloudColumn: 1,
     });
 
     final note = DatabaseNote(
