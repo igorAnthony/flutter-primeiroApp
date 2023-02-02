@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_primeiro_app/services/auth/auth_service.dart';
 import 'package:flutter_primeiro_app/services/crud/notes_service.dart';
 
@@ -43,7 +41,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _notesService.getUser(email: email);
-    print("erro");
+
     return await _notesService.createNote(owner: owner);
   }
 
@@ -81,7 +79,7 @@ class _NewNoteViewState extends State<NewNoteView> {
         builder: (context, snapshot) {
           switch(snapshot.connectionState){
             case ConnectionState.done:
-              _note = snapshot.data as DatabaseNote?;
+              _note = snapshot.data as DatabaseNote;
               _setupTextControllerListener();
               return TextField(
                 controller: _textController,

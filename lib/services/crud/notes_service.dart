@@ -11,11 +11,17 @@ class NotesService {
   Database? _db;
   
   List<DatabaseNote> _notes = [];
-  final _notesStreamController = StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
   
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance(){
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      }
+    );
+  }
   factory NotesService() => _shared;
 
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
@@ -38,7 +44,7 @@ class NotesService {
     _notesStreamController.add(_notes);
   }
 
-  Future<DatabaseNote> updateNote({required DatabaseNote note, required text}) async {
+  Future<DatabaseNote> updateNote({required DatabaseNote note, required String text}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
@@ -231,7 +237,7 @@ class NotesService {
       await db.execute(createUserTable);
       await db.execute(createNoteTable);
 
-      _cacheNotes();
+      await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectory();
     }
@@ -249,8 +255,8 @@ class DatabaseUser {
   });
 
   DatabaseUser.fromRow(Map<String, Object?> map)
-      : id = map["idColumn"] as int,
-        email = map["emailColumn"] as String;
+      : id = map[idColumn] as int,
+        email = map[emailColumn] as String;
 
   @override
   String toString() => 'Person, ID = $id, email = $email';
@@ -276,11 +282,11 @@ class DatabaseNote {
   });
 
   DatabaseNote.fromRow(Map<String, Object?> map)
-      : id = map["idColumn"] as int,
-        userId = map["userIdColumn"] as int,
-        text = map["textColumn"] as String,
+      : id = map[idColumn] as int,
+        userId = map[userIdColumn] as int,
+        text = map[textColumn] as String,
         isSyncedWithCloud =
-            (map["isSyncedWithCloudColumn"] as int) == 1 ? true : false;
+            (map[isSyncedWithCloudColumn] as int) == 1 ? true : false;
   @override
   String toString() =>
       'Note, ID = $id, userId = $userId, isSyncedWithCloud =  $isSyncedWithCloud';
