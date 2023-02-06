@@ -5,7 +5,6 @@ import 'package:flutter_primeiro_app/enums/menu_action.dart';
 import 'package:flutter_primeiro_app/services/auth/auth_service.dart';
 import 'package:flutter_primeiro_app/services/crud/notes_service.dart';
 import 'package:flutter_primeiro_app/utilities/dialogs/logout_dialog.dart';
-import 'package:flutter_primeiro_app/views/notes/new_note_view.dart';
 import 'package:flutter_primeiro_app/views/notes/notes_list_view.dart';
 
 import '../../constants/routes.dart';
@@ -36,7 +35,7 @@ class _NotesViewState extends State<NotesView> {
             IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(
-                  newNoteRoute,
+                  createOrUpdateNoteRoute,
                 );
               },
               icon: const Icon(Icons.add),
@@ -75,14 +74,21 @@ class _NotesViewState extends State<NotesView> {
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         case ConnectionState.waiting:
+                          return const Text("Waiting...");
                         case ConnectionState.active:
                           if (snapshot.hasData) {
                             final allNotes = snapshot.data as List<DatabaseNote>;
                             return NotesListView(
                               notes: allNotes,
-                              onDeleteNote: ((note) async {
+                              onDeleteNote: (note) async {
                                 await _notesService.deleteNote(id: note.id);
-                              }),
+                              },
+                              onTap: (note) async {
+                                Navigator.of(context).pushNamed(
+                                  createOrUpdateNoteRoute,
+                                  arguments:note,
+                                );
+                              },
                             );
                           } else {
                             return const CircularProgressIndicator();

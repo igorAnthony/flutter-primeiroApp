@@ -6,13 +6,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
+import 'dart:developer' as devtools show log;
 
 class NotesService {
   Database? _db;
   
   List<DatabaseNote> _notes = [];
-  late final StreamController<List<DatabaseNote>> _notesStreamController;
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
   
   static final NotesService _shared = NotesService._sharedInstance();
   NotesService._sharedInstance(){
@@ -24,6 +23,10 @@ class NotesService {
   }
   factory NotesService() => _shared;
 
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
+  
+  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
     try{
       final user = await getUser(email: email);
@@ -40,6 +43,7 @@ class NotesService {
 
   Future<void> _cacheNotes() async{
     final allNotes = await getAllNotes();
+    devtools.log("cachoteNotes: $allNotes");
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
   }
@@ -56,6 +60,7 @@ class NotesService {
     } else {
       final updateNote = await getNote(id: note.id);
       _notes.removeWhere((note) => note.id == updateNote.id);
+      devtools.log("updateNote: $updateNote");
       _notes.add(updateNote);
       _notesStreamController.add(_notes);
       return updateNote;
@@ -66,9 +71,8 @@ class NotesService {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
-    final notes = await db.query(
-      noteTable,
-    );
+    final notes = await db.query(noteTable);
+    devtools.log("getAllNotes: $notes");
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
   }
 
@@ -135,13 +139,13 @@ class NotesService {
       textColumn: text,
       isSyncedWithCloudColumn: 1,
     });
-
     final note = DatabaseNote(
       id: noteId,
       userId: owner.id,
       text: text,
       isSyncedWithCloud: true,
     );
+    devtools.log("createNote: $note");
     _notes.add(note);
     _notesStreamController.add(_notes);
     return note;
@@ -289,7 +293,7 @@ class DatabaseNote {
             (map[isSyncedWithCloudColumn] as int) == 1 ? true : false;
   @override
   String toString() =>
-      'Note, ID = $id, userId = $userId, isSyncedWithCloud =  $isSyncedWithCloud';
+      'Note, ID = $id, userId = $userId, isSyncedWithCloud =  $isSyncedWithCloud, text = $text';
 
   @override
   bool operator ==(covariant DatabaseNote other) => id == other.id;
