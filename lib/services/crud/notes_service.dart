@@ -53,8 +53,15 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
 
-    final updateCounts = await db
-        .update(noteTable, {textColumn: text, isSyncedWithCloudColumn: 0});
+    final updateCounts = await db.update(
+      noteTable, 
+      {
+        textColumn: text, 
+        isSyncedWithCloudColumn: 0
+      }, 
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
     if (updateCounts == 0) {
       throw CouldNotUpdateNotes();
     } else {
