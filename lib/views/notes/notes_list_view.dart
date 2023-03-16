@@ -26,7 +26,7 @@ class NotesListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final note = notes.elementAt(index);
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 7.0),
+          padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 3.0),
           child: Card(
             color: Color(Random().nextInt(0xffffffff)),
             shape: RoundedRectangleBorder(

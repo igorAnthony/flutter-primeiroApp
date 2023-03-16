@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_primeiro_app/services/auth/auth_service.dart';
 import 'package:flutter_primeiro_app/services/crud/notes_service.dart';
+import 'package:flutter_primeiro_app/utilities/decoration/text_form_field_decoration.dart';
 import 'package:flutter_primeiro_app/utilities/dialogs/cannot_share_empty_note_dialog.dart';
 import 'package:flutter_primeiro_app/utilities/generics/get_arguments.dart';
 import 'package:flutter_primeiro_app/services/cloud/cloud_note.dart';
@@ -106,14 +107,18 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
           switch(snapshot.connectionState){
             case ConnectionState.done:
               _setupTextControllerListener();
-              return TextField(
-                controller: _textController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Start typing your note...",
-                ),
+              return Padding(
+                padding: const EdgeInsets.only(top:15.0),
+                child: buildTextFieldNotes(_textController),
               );
+              // return TextField(
+              //   controller: _textController,
+              //   keyboardType: TextInputType.multiline,
+              //   maxLines: null,
+              //   decoration: const InputDecoration(
+              //     hintText: "Start typing your note...",
+              //   ),
+              // );
             default:
               return const CircularProgressIndicator();
           } 
