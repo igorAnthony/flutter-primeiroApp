@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_primeiro_app/constants/routes.dart';
 import 'package:flutter_primeiro_app/services/auth/auth_exceptions.dart';
 import 'package:flutter_primeiro_app/services/auth/auth_service.dart';
+import 'package:flutter_primeiro_app/services/auth/bloc/auth_bloc.dart';
+import 'package:flutter_primeiro_app/services/auth/bloc/auth_event.dart';
+import 'package:flutter_primeiro_app/services/auth/bloc/auth_state.dart';
 import 'package:flutter_primeiro_app/utilities/decoration/text_form_field_decoration.dart';
 import 'package:flutter_primeiro_app/utilities/dialogs/error_dialog.dart';
 
@@ -44,59 +48,27 @@ class _LoginViewState extends State<LoginView> {
                 return Padding(
                   padding: const EdgeInsets.only(top: 30.0),
                   child: Column(children: [
-                    // TextField(
-                    //   controller: _email,
-                    //   enableSuggestions: false,
-                    //   autocorrect: false,
-                    //   keyboardType: TextInputType.emailAddress,
-                    //   decoration: const InputDecoration(
-                    //     hintText: "Enter your email here",
-                    //   ),
-                    // ),
                     buildTextFormFieldEmail(_email),
                     buildTextFormFieldPassword(_password),
-                    // TextField(
-                    //   controller: _password,
-                    //   enableSuggestions: false,
-                    //   autocorrect: false,
-                    //   obscureText: true,
-                    //   decoration: const InputDecoration(
-                    //     hintText: "Enter your password here",
-                    //   ),
-                    // ),
-                    TextButton(
-                      onPressed: () async {
-                        final email = _email.text;
-                        final password = _password.text;
-                        try {
-                          await AuthService.firebase().logIn(
-                            email: email,
-                            password: password,
-                          );
-                          final user = AuthService.firebase().currentUser;
-                          if (user?.isEmailVerified ?? false) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              notesRoute,
-                              (Route<dynamic> route) => false,
-                            );
-                          } else {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              verifyEmailRoute,
-                              (Route<dynamic> route) => false,
-                            );
+                    BlocListener<AuthBloc, AuthState>(
+                      listener: (context, state) async {
+                        if(state is AuthStateLoggedOut){
+                          if(state.exception is UserNotFoundAuthException || state.exception is WrongPasswordAuthException){
+                            await showErrorDialog(context, "Wrong credentials");
                           }
-                        } on UserNotFoundAuthException {
-                          await showErrorDialog(context, "User not found");
-                        } on WrongPasswordAuthException {
-                          await showErrorDialog(context, "Wrong password");
-                        } on InvalidEmailAuthException {
-                          await showErrorDialog(context, "Invalid email");
-                        } on GenericAuthException {
-                          await showErrorDialog(context, 'Failed to register');
+                          else if(state.exception is GenericAuthException){
+                            await showErrorDialog(context, "Authentication error");
+                          }
                         }
                       },
-                      child: const Text("Login"),
-                      
+                      child: TextButton(
+                        onPressed: () async {
+                          final email = _email.text;
+                          final password = _password.text;
+                          context.read<AuthBloc>().add(AuthEventLogIn(email, password)); 
+                        },
+                        child: const Text("Login"),
+                      ),
                     ),
                     TextButton(
                         onPressed: () {
